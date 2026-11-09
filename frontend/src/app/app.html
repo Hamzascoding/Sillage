@@ -1,0 +1,17 @@
+<h1>{{ title() }} is running!</h1>
+
+<!-- Show this section only if the backendData signal has a value loaded -->
+@if (backendData()) {
+  <div>
+    <h3>Message from Backend:</h3>
+    <p>{{ backendData().message }}</p>
+    <p>Status: {{ backendData().status }}</p>
+  </div>
+} @else {
+  <p>Loading data from backend...</p>
+}
+
+
+
+
+<router-outlet />
