@@ -1,4 +1,4 @@
-# Sillage --- Plateforme de stages et de PFE
+# Sillage — Plateforme de stages et de PFE
 
 > Trouver le bon stage, grâce à ceux qui y sont passés.
 
@@ -7,8 +7,21 @@ stages et de projets de fin d'études (PFE). Elle met en relation les
 étudiants et les entreprises à travers un catalogue d'offres, un espace
 de candidature et des pages de présentation des entreprises.
 
-Le projet est réalisé dans le cadre du module **Projet Web --- Objectif
+Le projet est réalisé dans le cadre du module **Projet Web — Objectif
 3**.
+
+## Sommaire
+
+1. [Choix des technologies](#1-choix-des-technologies)
+2. [Fonctionnalités développées](#2-fonctionnalités-développées)
+3. [Pages principales](#3-pages-principales)
+4. [Architecture du projet](#4-architecture-du-projet)
+5. [Prérequis et dépendances](#5-prérequis-et-dépendances)
+6. [Installation et lancement](#6-installation-et-lancement)
+7. [Comptes de démonstration](#7-comptes-de-démonstration)
+8. [Tests backend](#8-tests-backend)
+9. [Dépannage](#9-dépannage)
+10. [Limites actuelles et évolutions possibles](#10-limites-actuelles-et-évolutions-possibles)
 
 ## 1. Choix des technologies
 
@@ -86,43 +99,19 @@ frontend, mais ces informations restent propres au navigateur utilisé.
 
 ## 3. Pages principales
 
-  -------------------------------------------------------------------------------------
-  Page                    Route                                 Description
-  ----------------------- ------------------------------------- -----------------------
-  Accueil                 `/`                                   Présentation de la
-                                                                plateforme et accès aux
-                                                                offres
-
-  Offres                  `/offres`                             Catalogue, filtres et
-                                                                pagination
-
-  Détail d'une offre      `/offres/:id`                         Informations et actions
-                                                                liées à une offre
-
-  Entreprises             `/entreprises`                        Annuaire des
-                                                                entreprises et nombre
-                                                                d'offres
-
-  Détail d'une entreprise `/entreprises/:id`                    Présentation, offres et
-                                                                avis
-
-  Connexion               `/connexion`                          Authentification
-
-  Mes candidatures        `/suivi`                              Suivi des candidatures
-                                                                de l'étudiant
-
-  Mes favoris             `/favoris`                            Liste des offres
-                                                                enregistrées
-
-  Mon profil              `/profil`                             Gestion des
-                                                                informations et du CV
-
-  Espace entreprise       `/espace-entreprise`                  Tableau de bord de
-                                                                l'entreprise
-
-  Créer une offre         `/espace-entreprise/nouvelle-offre`   Formulaire de création
-                                                                d'offre
-  -------------------------------------------------------------------------------------
+| Page                    | Route                                 | Description                                         |
+| ----------------------- | ------------------------------------- | --------------------------------------------------- |
+| Accueil                 | `/`                                   | Présentation de la plateforme et accès aux offres   |
+| Offres                  | `/offres`                             | Catalogue, filtres et pagination                    |
+| Détail d'une offre      | `/offres/:id`                         | Informations et actions liées à une offre           |
+| Entreprises             | `/entreprises`                        | Annuaire des entreprises et nombre d'offres         |
+| Détail d'une entreprise | `/entreprises/:id`                    | Présentation, offres et avis                        |
+| Connexion               | `/connexion`                          | Authentification                                    |
+| Mes candidatures        | `/suivi`                              | Suivi des candidatures de l'étudiant                |
+| Mes favoris             | `/favoris`                            | Liste des offres enregistrées                       |
+| Mon profil              | `/profil`                             | Gestion des informations et du CV                   |
+| Espace entreprise       | `/espace-entreprise`                  | Tableau de bord de l'entreprise                     |
+| Créer une offre         | `/espace-entreprise/nouvelle-offre`   | Formulaire de création d'offre                      |
 
 Certaines pages nécessitent une connexion et/ou un rôle particulier.
 
@@ -139,6 +128,7 @@ sillage/
 │   │       └── shared/     # En-tête, pied de page et composants réutilisables
 │   ├── angular.json
 │   ├── package.json
+│   ├── proxy.conf.json     # Proxy de développement (/api → backend)
 │   └── tailwind.config.js
 │
 ├── backend/
@@ -158,25 +148,67 @@ sillage/
 └── README.md
 ```
 
-## 5. Prérequis
+## 5. Prérequis et dépendances
 
--   **Node.js 20 ou supérieur**
--   **npm**
--   Un navigateur web récent
+### Prérequis système
 
-Vérifier les installations :
+| Outil       | Version minimale | Rôle                                         | Vérification |
+| ----------- | ---------------- | -------------------------------------------- | ------------ |
+| **Node.js** | 20 ou supérieur  | Exécution du backend et des outils Angular   | `node -v`    |
+| **npm**     | Fourni avec Node | Installation des dépendances et des scripts  | `npm -v`     |
+| Navigateur  | Version récente  | Utilisation de l'application                 | —            |
+
+Optionnel : l'**Angular CLI** peut être installé globalement pour
+utiliser directement la commande `ng`. Ce n'est pas obligatoire, car les
+scripts npm du projet utilisent la version installée localement.
 
 ``` bash
-node -v
-npm -v
+npm install -g @angular/cli
 ```
+
+### Dépendances du projet
+
+Les dépendances sont déclarées dans les fichiers `package.json` de
+chaque dossier et s'installent automatiquement avec `npm install`. Les
+versions exactes se trouvent dans ces fichiers.
+
+**Frontend** (`frontend/package.json`)
+
+| Dépendance           | Utilité                                              |
+| -------------------- | ---------------------------------------------------- |
+| Angular 19           | Framework de l'application (composants, DI, HTTP)    |
+| Angular Router       | Navigation et guards de routes                       |
+| Angular Forms        | Reactive Forms (connexion, saisie)                   |
+| RxJS                 | Gestion des flux asynchrones (requêtes HTTP)         |
+| TypeScript           | Typage et compilation                                |
+| Tailwind CSS         | Styles utilitaires et identité visuelle              |
+| Angular CLI          | Serveur de développement et compilation (`ng`)       |
+
+**Backend** (`backend/package.json`)
+
+| Dépendance     | Utilité                                                |
+| -------------- | ------------------------------------------------------ |
+| Express        | Serveur et routes de l'API REST                        |
+| jsonwebtoken   | Création et vérification des jetons JWT                |
+| bcryptjs       | Hachage des mots de passe                              |
 
 ## 6. Installation et lancement
 
 Le frontend et le backend doivent être lancés séparément, dans deux
-terminaux.
+terminaux. **Démarrer le backend en premier**, car le frontend en a
+besoin pour récupérer les données.
 
-### Étape 1 --- Lancer le backend
+### Récapitulatif rapide
+
+| Terminal   | Commandes                                          | Adresse                       |
+| ---------- | -------------------------------------------------- | ----------------------------- |
+| Terminal 1 | `cd backend` → `npm install` → `npm start`         | http://localhost:3000/api     |
+| Terminal 2 | `cd frontend` → `npm install` → `npm start`        | http://localhost:4200         |
+
+`npm install` n'est nécessaire qu'à la première utilisation (ou après
+une modification des dépendances).
+
+### Étape 1 — Lancer le backend (serveur API)
 
 Depuis le dossier racine du projet :
 
@@ -204,7 +236,9 @@ En développement, le serveur peut être lancé avec :
 npm run dev
 ```
 
-### Étape 2 --- Lancer le frontend
+Pour arrêter le serveur, utiliser `Ctrl + C` dans le terminal.
+
+### Étape 2 — Lancer le frontend
 
 Ouvrir un deuxième terminal, depuis le dossier racine :
 
@@ -224,6 +258,16 @@ Le frontend utilise le proxy de développement configuré dans
 `frontend/proxy.conf.json` pour transmettre les requêtes `/api` au
 backend local.
 
+### Scripts disponibles
+
+| Dossier     | Commande         | Description                                         |
+| ----------- | ---------------- | --------------------------------------------------- |
+| `backend`   | `npm start`      | Lance le serveur API                                |
+| `backend`   | `npm run dev`    | Lance le serveur API en mode développement          |
+| `backend`   | `npm test`       | Exécute les tests automatisés du backend            |
+| `frontend`  | `npm start`      | Lance le serveur de développement Angular           |
+| `frontend`  | `npm run build`  | Compile l'application pour la production            |
+
 ### Réinitialiser les données de démonstration
 
 Le fichier `backend/data/db.json` contient les données persistées
@@ -241,11 +285,11 @@ une remise à zéro complète est souhaitée.
 Les comptes ci-dessous sont les comptes de démonstration configurés pour
 le projet :
 
-  Rôle             Adresse e-mail         Mot de passe
-  ---------------- ---------------------- ------------------
-  Étudiant         `aziz@demo.tn`         `demo1234`
-  Administrateur   `admin@demo.tn`        `admin1234`
-  Entreprise       `entreprise@demo.tn`   `entreprise1234`
+| Rôle           | Adresse e-mail         | Mot de passe     |
+| -------------- | ---------------------- | ---------------- |
+| Étudiant       | `aziz@demo.tn`         | `demo1234`       |
+| Administrateur | `admin@demo.tn`        | `admin1234`      |
+| Entreprise     | `entreprise@demo.tn`   | `entreprise1234` |
 
 Si les identifiants ne fonctionnent pas après une modification ou une
 réinitialisation de la base, vérifier les comptes définis dans
@@ -260,7 +304,18 @@ cd backend
 npm test
 ```
 
-## 9. Limites actuelles et évolutions possibles
+## 9. Dépannage
+
+| Problème                                              | Solution                                                                                                        |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `node` ou `npm` n'est pas reconnu                     | Installer Node.js 20+ depuis nodejs.org, puis rouvrir le terminal.                                              |
+| Erreur pendant `npm install`                          | Vérifier la version de Node (`node -v`). En dernier recours, supprimer `node_modules` et relancer `npm install`. |
+| Le port 3000 ou 4200 est déjà utilisé                 | Fermer l'autre programme qui utilise ce port, ou arrêter l'ancienne instance avec `Ctrl + C`.                    |
+| Le frontend s'affiche mais les données sont vides     | Vérifier que le backend est démarré (`http://localhost:3000/api/health`) et que `proxy.conf.json` est présent.   |
+| Connexion impossible avec les comptes de démonstration | Vérifier `backend/src/seed.js` ou réinitialiser `backend/data/db.json`.                                         |
+| Les favoris, le profil ou le CV ont disparu           | Ces données sont dans le `localStorage` : elles sont liées au navigateur et au profil utilisés.                  |
+
+## 10. Limites actuelles et évolutions possibles
 
 -   Les données principales du backend sont stockées dans un fichier
     JSON ; une migration vers PostgreSQL pourra être réalisée
@@ -281,4 +336,4 @@ persistance centralisée.
 
 ------------------------------------------------------------------------
 
-Projet Sillage --- Projet Web, Objectif 3.
+Projet Sillage — Projet Web, Objectif 3.
