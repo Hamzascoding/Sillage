@@ -1,0 +1,49 @@
+<section class="rounded-carte bg-sillage/5 px-6 py-10 sm:px-10">
+  <h1 class="max-w-2xl text-3xl font-bold leading-tight sm:text-4xl">
+    Trouve le bon stage, grâce à ceux qui y sont passés.
+  </h1>
+  <p class="mt-3 max-w-xl text-muted">
+    Offres de stages et de PFE, avis vérifiés d’anciens stagiaires, candidatures suivies.
+  </p>
+
+  <form class="mt-6 flex max-w-2xl flex-col gap-3 sm:flex-row" (ngSubmit)="submit()" role="search">
+    <label for="recherche" class="sr-only">Rechercher un poste, une technologie ou une entreprise</label>
+    <input id="recherche" type="search" class="field" placeholder="Poste, techno, entreprise" [formControl]="search" />
+    <button type="submit" class="btn-primary shrink-0">Rechercher</button>
+  </form>
+
+  <div class="mt-4 flex flex-wrap items-center gap-2">
+    <span class="text-sm text-muted">Accès rapide :</span>
+    @for (n of niveaux; track n) {
+      <a [routerLink]="['/offres']" [queryParams]="{ niveau: n }" class="chip border border-sillage bg-white text-sillage hover:bg-surface">{{ n }}</a>
+    }
+  </div>
+</section>
+
+<section class="mt-8 grid gap-4 sm:grid-cols-3" aria-label="Ce que propose Sillage">
+  @for (v of valeurs; track v.titre) {
+    <div class="card p-5">
+      <h2 class="text-lg font-semibold">{{ v.titre }}</h2>
+      <p class="mt-1 text-sm text-muted">{{ v.texte }}</p>
+    </div>
+  }
+</section>
+
+<section class="mt-10" aria-labelledby="titre-recentes">
+  <div class="flex items-end justify-between">
+    <h2 id="titre-recentes" class="text-xl font-semibold">Offres récentes</h2>
+    <a routerLink="/offres" class="text-sm font-semibold text-sillage hover:underline">Tout voir</a>
+  </div>
+
+  <div class="mt-4 space-y-3" aria-live="polite">
+    @if (loading()) {
+      <p class="text-muted">Chargement des offres…</p>
+    } @else if (error()) {
+      <p class="rounded-champ bg-elan/10 p-3 text-elan-profond">{{ error() }}</p>
+    } @else {
+      @for (offer of recent(); track offer.id) {
+        <app-offer-card [offer]="offer" />
+      }
+    }
+  </div>
+</section>

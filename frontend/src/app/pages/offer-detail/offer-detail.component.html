@@ -1,0 +1,172 @@
+@if (loading()) {
+  <p class="text-muted">Chargement de l’offre…</p>
+} @else if (error()) {
+  <div class="card p-6 text-center">
+    <p class="font-semibold">{{ error() }}</p>
+    <a routerLink="/offres" class="btn-primary mt-4">Retour aux offres</a>
+  </div>
+} @else {
+  @if (offer(); as o) {
+    <nav class="text-sm text-muted" aria-label="Fil d’Ariane">
+      <a routerLink="/offres" class="hover:underline">Offres</a> ›
+      <span>{{ o.titre }}</span>
+    </nav>
+
+    <header class="mt-3 flex items-start gap-4">
+      <div
+        class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-sillage/10 font-display font-bold text-sillage"
+        aria-hidden="true"
+      >
+        {{ o.entreprise.nom.slice(-1) }}
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold">{{ o.titre }}</h1>
+        <p class="text-muted">{{ o.entreprise.nom }} · {{ o.ville }} · {{ o.mode }}</p>
+        <div class="mt-2 flex flex-wrap gap-2">
+          <span class="chip bg-sillage/10 text-sillage">{{ o.type }}</span>
+          <span class="chip bg-surface text-muted">{{ o.dureeSemaines }} semaines</span>
+          @if (o.remunere) {
+            <span class="chip bg-valide/20 text-valide-profond">Gratifié</span>
+          }
+        </div>
+      </div>
+    </header>
+
+    <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_20rem]">
+      <article class="card space-y-5 p-6">
+        <section>
+          <h2 class="text-lg font-semibold">Description</h2>
+          <p class="mt-1 text-muted">{{ o.description }}</p>
+        </section>
+        <section>
+          <h2 class="text-lg font-semibold">Missions</h2>
+          <ul class="mt-1 list-disc space-y-1 pl-5 text-muted">
+            @for (m of o.missions; track m) {
+              <li>{{ m }}</li>
+            }
+          </ul>
+        </section>
+        <section>
+          <h2 class="text-lg font-semibold">Profil recherché</h2>
+          <ul class="mt-1 list-disc space-y-1 pl-5 text-muted">
+            @for (p of o.profil; track p) {
+              <li>{{ p }}</li>
+            }
+          </ul>
+        </section>
+      </article>
+
+      <aside class="space-y-4">
+        <div class="card p-5">
+          <h2 class="text-lg font-semibold">Informations clés</h2>
+          <dl class="mt-3 space-y-2 text-sm">
+            <div class="flex justify-between">
+              <dt class="text-muted">Durée</dt>
+              <dd class="font-semibold">{{ o.dureeSemaines }} semaines</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-muted">Niveau</dt>
+              <dd class="font-semibold">{{ o.niveau }}</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-muted">Gratification</dt>
+              <dd class="font-semibold">{{ o.remunere ? 'Oui' : 'Non' }}</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-muted">Date limite</dt>
+              <dd class="font-semibold">{{ o.dateLimite | frDate }}</dd>
+            </div>
+          </dl>
+
+          <div class="mt-5 space-y-2">
+            <!-- Student actions -->
+            @if (auth.user()?.role === 'etudiant') {
+              <button
+                type="button"
+                class="btn-primary w-full"
+                [disabled]="busy()"
+                (click)="act('envoyee')"
+              >
+                Postuler
+              </button>
+
+              <button
+                type="button"
+                class="btn-secondary w-full"
+                [disabled]="busy()"
+                (click)="saveFavorite()"
+              >
+                {{ isFavorite() ? 'Retirer des favoris' : 'Ajouter aux favoris' }}
+              </button>
+            }
+
+            <!-- Enterprise actions -->
+            @else if (auth.user()?.role === 'entreprise') {
+              @if (isOwnOffer()) {
+                <button
+                  type="button"
+                  class="w-full rounded-xl bg-rose-600 px-4 py-3 font-semibold text-white transition hover:bg-rose-700"
+                  (click)="showDeleteDemo()"
+                >
+                  Supprimer cette offre
+                </button>
+              } @else {
+                <div class="rounded-xl bg-surface p-4 text-center text-sm text-muted">
+                  <p class="font-semibold">Offre d'une autre entreprise</p>
+                  <p class="mt-1">
+                    Cette offre ne vous appartient pas. Vous ne pouvez pas la supprimer.
+                  </p>
+                </div>
+              }
+            }
+
+            <!-- Admin -->
+            @else if (auth.user()?.role === 'admin') {
+              <div class="rounded-xl bg-surface p-4 text-center text-sm text-muted">
+                Consultation uniquement : vous ne pouvez pas postuler ou supprimer cette offre.
+              </div>
+            }
+
+            <!-- Visitor -->
+            @else {
+              <a routerLink="/connexion" class="btn-primary block w-full text-center">
+                Connectez-vous pour postuler
+              </a>
+            }
+          </div>
+          @if (!auth.isLoggedIn()) {
+            <p class="mt-3 text-xs text-muted">Une connexion est demandée pour postuler.</p>
+          }
+          <p
+            class="mt-3 text-sm font-semibold"
+            [class.text-valide-profond]="!messageIsError()"
+            [class.text-elan-profond]="messageIsError()"
+            aria-live="polite"
+          >
+            {{ message() }}
+          </p>
+        </div>
+
+        <div class="card p-5">
+          <p class="font-semibold">{{ o.entreprise.nom }}</p>
+          <p class="text-sm text-muted">{{ o.entreprise.secteur }}</p>
+          <div class="mt-2 flex items-center gap-2 text-sm">
+            @if (o.entreprise.note !== null) {
+              <app-stars [value]="o.entreprise.note" />
+              <span class="font-semibold">{{ o.entreprise.note }}</span>
+              <span class="text-muted">· {{ o.entreprise.nbAvis }} avis vérifiés</span>
+            } @else {
+              <span class="text-muted">Pas encore d’avis</span>
+            }
+          </div>
+          <a
+            [routerLink]="['/entreprises', o.entreprise.id]"
+            class="mt-3 inline-block text-sm font-semibold text-sillage hover:underline"
+          >
+            Voir la page entreprise ›
+          </a>
+        </div>
+      </aside>
+    </div>
+  }
+}

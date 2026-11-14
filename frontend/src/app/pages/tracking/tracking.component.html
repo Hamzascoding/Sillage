@@ -1,0 +1,83 @@
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="text-sm font-semibold uppercase tracking-wide text-sillage">Espace étudiant</p>
+    <h1 class="mt-1 text-2xl font-bold">Mes candidatures</h1>
+    <p class="mt-1 text-sm text-muted">
+      Retrouvez les offres auxquelles vous avez réellement postulé.
+    </p>
+  </div>
+
+  <a routerLink="/offres" class="btn-primary">Découvrir les offres</a>
+</div>
+
+<div class="mt-6 grid gap-3 sm:grid-cols-3">
+  <div class="card p-4">
+    <p class="text-sm text-muted">Total des candidatures</p>
+    <p class="mt-1 text-2xl font-bold">{{ total }}</p>
+  </div>
+  <div class="card p-4">
+    <p class="text-sm text-muted">En attente / envoyées</p>
+    <p class="mt-1 text-2xl font-bold">
+      {{ sentCount }}
+    </p>
+  </div>
+  <div class="card p-4">
+    <p class="text-sm text-muted">Entretiens</p>
+    <p class="mt-1 text-2xl font-bold">
+      {{ interviewCount }}
+    </p>
+  </div>
+</div>
+
+@if (loading()) {
+  <p class="mt-6 text-sm text-muted">Chargement de vos candidatures…</p>
+} @else if (error()) {
+  <p class="mt-6 rounded-champ bg-rose-50 p-4 text-sm text-rose-700">
+    {{ error() }}
+  </p>
+} @else if (applications().length === 0) {
+  <div class="card mt-6 px-6 py-12 text-center">
+    <div
+      class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-sillage/10 text-2xl"
+    >
+      <span aria-hidden="true">📄</span>
+    </div>
+    <h2 class="mt-4 text-lg font-bold">Aucune candidature pour le moment</h2>
+    <p class="mx-auto mt-2 max-w-md text-sm text-muted">
+      Lorsque vous postulerez à une offre, elle apparaîtra ici. Les offres que vous souhaitez garder
+      pour plus tard se trouvent dans vos favoris.
+    </p>
+    <a routerLink="/offres" class="btn-primary mt-5">Explorer les offres</a>
+  </div>
+} @else {
+  <div class="mt-6 space-y-3">
+    @for (app of applications(); track app.id) {
+      <article class="card flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center">
+        <div class="min-w-0">
+          <a [routerLink]="['/offres', app.offreId]" class="font-semibold hover:text-sillage">
+            {{ app.titre }}
+          </a>
+          <p class="mt-1 text-sm text-muted">{{ app.entreprise }}</p>
+          <p class="mt-2 text-xs text-muted">Candidature envoyée le {{ app.creeLe | frDate }}</p>
+        </div>
+
+        <div class="flex shrink-0 items-center gap-3">
+          <span class="chip" [class]="statusClass(app.statut)">
+            {{ statusLabel(app.statut) }}
+          </span>
+          <a
+            [routerLink]="['/offres', app.offreId]"
+            class="text-sm font-semibold text-sillage hover:underline"
+          >
+            Voir l’offre
+          </a>
+        </div>
+      </article>
+    }
+  </div>
+}
+
+<p class="mt-5 text-xs text-muted">
+  Les statuts sont communiqués et mis à jour par les entreprises. Vous ne pouvez pas modifier
+  vous-même l’état de votre candidature.
+</p>

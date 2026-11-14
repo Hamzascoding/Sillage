@@ -1,0 +1,155 @@
+<div class="mx-auto max-w-md">
+  <div class="card p-6">
+    <div class="flex border-b border-bordure" role="group" aria-label="Choix du formulaire">
+      <button
+        type="button"
+        class="flex-1 px-3 py-2 text-sm font-semibold"
+        [class.border-b-2]="mode() === 'connexion'"
+        [class.border-sillage]="mode() === 'connexion'"
+        [class.text-sillage]="mode() === 'connexion'"
+        [attr.aria-pressed]="mode() === 'connexion'"
+        (click)="setMode('connexion')"
+      >
+        Connexion
+      </button>
+      <button
+        type="button"
+        class="flex-1 px-3 py-2 text-sm font-semibold"
+        [class.border-b-2]="mode() === 'inscription'"
+        [class.border-sillage]="mode() === 'inscription'"
+        [class.text-sillage]="mode() === 'inscription'"
+        [attr.aria-pressed]="mode() === 'inscription'"
+        (click)="setMode('inscription')"
+      >
+        Inscription
+      </button>
+    </div>
+
+    @if (mode() === 'connexion') {
+      <form class="mt-5 space-y-4" [formGroup]="loginForm" (ngSubmit)="submitLogin()" novalidate>
+        <h1 class="text-xl font-bold">Se connecter</h1>
+        <div>
+          <label for="login-email" class="label">Adresse e-mail</label>
+          <input
+            id="login-email"
+            type="email"
+            autocomplete="email"
+            class="field"
+            formControlName="email"
+            [class.field-error]="
+              loginForm.controls.email.invalid && loginForm.controls.email.touched
+            "
+          />
+          @if (loginForm.controls.email.invalid && loginForm.controls.email.touched) {
+            <p class="mt-1 text-sm text-elan-profond">Saisissez une adresse e-mail valide.</p>
+          }
+        </div>
+        <div>
+          <label for="login-mdp" class="label">Mot de passe</label>
+          <input
+            id="login-mdp"
+            type="password"
+            autocomplete="current-password"
+            class="field"
+            formControlName="motDePasse"
+            [class.field-error]="
+              loginForm.controls.motDePasse.invalid && loginForm.controls.motDePasse.touched
+            "
+          />
+          @if (loginForm.controls.motDePasse.invalid && loginForm.controls.motDePasse.touched) {
+            <p class="mt-1 text-sm text-elan-profond">Le mot de passe est obligatoire.</p>
+          }
+        </div>
+        @if (error()) {
+          <p
+            class="rounded-champ bg-elan/10 p-3 text-sm font-semibold text-elan-profond"
+            aria-live="polite"
+          >
+            {{ error() }}
+          </p>
+        }
+        <button type="submit" class="btn-primary w-full" [disabled]="busy()">Se connecter</button>
+        <p class="rounded-champ bg-surface p-3 text-xs text-muted">
+          Comptes de démonstration : <br /><strong>aziz&#64;demo.tn</strong> /
+          <strong>demo1234</strong> <br />
+          <strong>admin&#64;demo.tn</strong> / <strong>admin1234</strong> <br />
+          <strong>entreprise&#64;demo.tn</strong> / <strong>entreprise1234</strong>
+        </p>
+      </form>
+    } @else {
+      <form
+        class="mt-5 space-y-4"
+        [formGroup]="registerForm"
+        (ngSubmit)="submitRegister()"
+        novalidate
+      >
+        <h1 class="text-xl font-bold">Créer un compte étudiant</h1>
+        <div>
+          <label for="reg-nom" class="label">Nom complet</label>
+          <input
+            id="reg-nom"
+            type="text"
+            autocomplete="name"
+            class="field"
+            formControlName="nom"
+            [class.field-error]="
+              registerForm.controls.nom.invalid && registerForm.controls.nom.touched
+            "
+          />
+          @if (registerForm.controls.nom.invalid && registerForm.controls.nom.touched) {
+            <p class="mt-1 text-sm text-elan-profond">
+              Le nom doit contenir au moins 2 caractères.
+            </p>
+          }
+        </div>
+        <div>
+          <label for="reg-email" class="label">Adresse e-mail</label>
+          <input
+            id="reg-email"
+            type="email"
+            autocomplete="email"
+            class="field"
+            formControlName="email"
+            [class.field-error]="
+              registerForm.controls.email.invalid && registerForm.controls.email.touched
+            "
+          />
+          @if (registerForm.controls.email.invalid && registerForm.controls.email.touched) {
+            <p class="mt-1 text-sm text-elan-profond">Saisissez une adresse e-mail valide.</p>
+          }
+        </div>
+        <div>
+          <label for="reg-mdp" class="label">Mot de passe (8 caractères minimum)</label>
+          <input
+            id="reg-mdp"
+            type="password"
+            autocomplete="new-password"
+            class="field"
+            formControlName="motDePasse"
+            [class.field-error]="
+              registerForm.controls.motDePasse.invalid && registerForm.controls.motDePasse.touched
+            "
+          />
+          @if (
+            registerForm.controls.motDePasse.invalid && registerForm.controls.motDePasse.touched
+          ) {
+            <p class="mt-1 text-sm text-elan-profond">
+              Le mot de passe doit contenir au moins 8 caractères.
+            </p>
+          }
+        </div>
+        @if (error()) {
+          <p
+            class="rounded-champ bg-elan/10 p-3 text-sm font-semibold text-elan-profond"
+            aria-live="polite"
+          >
+            {{ error() }}
+          </p>
+        }
+        <button type="submit" class="btn-primary w-full" [disabled]="busy()">
+          Créer mon compte
+        </button>
+      </form>
+    }
+  </div>
+</div>

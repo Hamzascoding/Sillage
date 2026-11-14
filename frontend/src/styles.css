@@ -1,3 +1,26 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@import 'tailwindcss';
+@layer base {
+  body { @apply bg-surface font-sans text-encre antialiased; }
+  h1, h2, h3 { @apply font-display; }
+  :focus-visible { outline: 2px solid #ffb020; outline-offset: 2px; }
+}
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center rounded-full px-5 py-2 font-display text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-sillage text-white hover:bg-sillage-dark; }
+  .btn-secondary { @apply btn border-2 border-sillage bg-white text-sillage hover:bg-surface; }
+  .card { @apply rounded-carte bg-white shadow-carte; }
+  .chip { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .field { @apply w-full rounded-champ border border-bordure bg-white px-3 py-2 text-sm focus:border-sillage focus:outline-none focus:ring-2 focus:ring-sillage/30; }
+  .field-error { @apply border-elan-profond; }
+  .label { @apply mb-1 block text-sm font-semibold; }
+}
+
+/* Aperçu et emplacement pendant le glisser-déposer du Kanban (Angular CDK) */
+.cdk-drag-preview { @apply rounded-carte bg-white shadow-carte; box-sizing: border-box; }
+.cdk-drag-placeholder { opacity: 0.3; }
+.cdk-drag-animating { transition: transform 250ms cubic-bezier(0, 0, 0.2, 1); }
+.cdk-drop-list-dragging .cdk-drag { transition: transform 250ms cubic-bezier(0, 0, 0.2, 1); }

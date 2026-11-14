@@ -1,0 +1,91 @@
+<h1 class="text-2xl font-bold">Offres de stage et de PFE</h1>
+<p class="mt-1 text-muted" aria-live="polite">
+  @if (result(); as r) {
+    {{ r.total }} offre{{ r.total > 1 ? 's' : '' }} correspond{{ r.total > 1 ? 'ent' : '' }} à votre recherche
+  } @else {
+    Chargement…
+  }
+</p>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-[16rem_1fr]">
+  <form [formGroup]="form" class="card h-fit space-y-4 p-4" aria-label="Filtres des offres">
+    <div>
+      <label for="f-q" class="label">Recherche</label>
+      <input id="f-q" type="search" class="field" placeholder="Poste, techno, entreprise" formControlName="q" />
+    </div>
+    <div>
+      <label for="f-niveau" class="label">Niveau</label>
+      <select id="f-niveau" class="field" formControlName="niveau">
+        <option value="">Tous les niveaux</option>
+        @for (n of niveaux; track n) {
+          <option [value]="n">{{ n }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label for="f-mode" class="label">Mode</label>
+      <select id="f-mode" class="field" formControlName="mode">
+        <option value="">Tous les modes</option>
+        @for (m of modes; track m) {
+          <option [value]="m">{{ m }}</option>
+        }
+      </select>
+    </div>
+    <div class="flex items-center gap-2">
+      <input id="f-remunere" type="checkbox" class="h-4 w-4 accent-sillage" formControlName="remunere" />
+      <label for="f-remunere" class="text-sm font-semibold">Stage gratifié uniquement</label>
+    </div>
+    <div>
+      <label for="f-note" class="label">Note de l’entreprise</label>
+      <select id="f-note" class="field" formControlName="noteMin">
+        @for (n of notes; track n.value) {
+          <option [ngValue]="n.value">{{ n.label }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label for="f-tri" class="label">Trier par</label>
+      <select id="f-tri" class="field" formControlName="tri">
+        @for (t of tris; track t.value) {
+          <option [value]="t.value">{{ t.label }}</option>
+        }
+      </select>
+    </div>
+    <button type="button" class="btn-secondary w-full" (click)="reset()">Réinitialiser</button>
+  </form>
+
+  <section aria-label="Résultats">
+    @if (error()) {
+      <p class="rounded-champ bg-elan/10 p-3 text-elan-profond">{{ error() }}</p>
+    }
+    @if (loading() && !result()) {
+      <p class="text-muted">Chargement des offres…</p>
+    }
+    @if (result(); as r) {
+      <div class="space-y-3" [class.opacity-60]="loading()">
+        @for (offer of r.items; track offer.id) {
+          <app-offer-card [offer]="offer" />
+        } @empty {
+          <div class="card p-6 text-center">
+            <p class="font-semibold">Aucune offre ne correspond à ces critères.</p>
+            <p class="mt-1 text-sm text-muted">Essayez de retirer un filtre.</p>
+            <button type="button" class="btn-secondary mt-4" (click)="reset()">Réinitialiser les filtres</button>
+          </div>
+        }
+      </div>
+
+      @if (r.pages > 1) {
+        <nav class="mt-6 flex flex-wrap items-center justify-center gap-2" aria-label="Pagination">
+          <button type="button" class="btn-secondary" [disabled]="r.page === 1" (click)="goTo(r.page - 1)">Précédent</button>
+          @for (p of pageNumbers(); track p) {
+            <button type="button" class="btn" [class.bg-sillage]="p === r.page" [class.text-white]="p === r.page"
+                    [class.bg-white]="p !== r.page" [attr.aria-current]="p === r.page ? 'page' : null" (click)="goTo(p)">
+              {{ p }}
+            </button>
+          }
+          <button type="button" class="btn-secondary" [disabled]="r.page === r.pages" (click)="goTo(r.page + 1)">Suivant</button>
+        </nav>
+      }
+    }
+  </section>
+</div>

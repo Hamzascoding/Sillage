@@ -1,0 +1,158 @@
+@if (loading()) {
+  <p class="text-muted">Chargement de l’entreprise…</p>
+} @else if (error()) {
+  <div class="card p-6 text-center">
+    <p class="font-semibold">{{ error() }}</p>
+    <a routerLink="/entreprises" class="btn-primary mt-4">Retour aux entreprises</a>
+  </div>
+} @else {
+  @if (company(); as c) {
+  <nav class="text-sm text-muted" aria-label="Fil d’Ariane">
+    <a routerLink="/entreprises" class="hover:underline">Entreprises</a> › <span>{{ c.nom }}</span>
+  </nav>
+
+  <header class="card mt-3 flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex items-center gap-4">
+      <div class="flex h-14 w-14 items-center justify-center rounded-xl bg-valide/20 font-display font-bold text-valide-profond" aria-hidden="true">
+        {{ c.nom.slice(-1) }}
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold">{{ c.nom }}</h1>
+        <p class="text-muted">{{ c.secteur }} · {{ c.ville }} · {{ c.taille }}</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      @if (c.note !== null) {
+        <span class="font-display text-3xl font-bold">{{ c.note }}</span>
+        <div>
+          <app-stars [value]="c.note" />
+          <p class="text-sm text-muted">{{ c.nbAvis }} avis vérifiés</p>
+        </div>
+      } @else {
+        <span class="text-muted">Pas encore d’avis</span>
+      }
+    </div>
+  </header>
+
+  <div class="mt-6 flex gap-2 border-b border-bordure" role="group" aria-label="Sections de la page">
+    <button type="button" class="px-3 py-2 text-sm font-semibold" [class.border-b-2]="tab() === 'presentation'" [class.border-sillage]="tab() === 'presentation'"
+            [class.text-sillage]="tab() === 'presentation'" [attr.aria-pressed]="tab() === 'presentation'" (click)="setTab('presentation')">Présentation</button>
+    <button type="button" class="px-3 py-2 text-sm font-semibold" [class.border-b-2]="tab() === 'offres'" [class.border-sillage]="tab() === 'offres'"
+            [class.text-sillage]="tab() === 'offres'" [attr.aria-pressed]="tab() === 'offres'" (click)="setTab('offres')">Offres ({{ c.offres.length }})</button>
+    <button type="button" class="px-3 py-2 text-sm font-semibold" [class.border-b-2]="tab() === 'avis'" [class.border-sillage]="tab() === 'avis'"
+            [class.text-sillage]="tab() === 'avis'" [attr.aria-pressed]="tab() === 'avis'" (click)="setTab('avis')">Avis ({{ c.nbAvis }})</button>
+  </div>
+
+  <div class="mt-6">
+    @switch (tab()) {
+      @case ('presentation') {
+        <section class="card p-6">
+          <h2 class="text-lg font-semibold">À propos</h2>
+          <p class="mt-2 text-muted">{{ c.description }}</p>
+        </section>
+      }
+      @case ('offres') {
+        <section class="space-y-3">
+          @for (offer of c.offres; track offer.id) {
+            <app-offer-card [offer]="offer" />
+          } @empty {
+            <p class="text-muted">Aucune offre ouverte pour le moment.</p>
+          }
+        </section>
+      }
+      @case ('avis') {
+        <div class="grid gap-6 lg:grid-cols-[18rem_1fr]">
+          <section class="card h-fit p-5" aria-label="Notes par critère">
+            <h2 class="text-lg font-semibold">Notes par critère</h2>
+            <ul class="mt-3 space-y-3">
+              @for (crit of criteres; track crit.key) {
+                <li>
+                  <div class="flex justify-between text-sm">
+                    <span>{{ crit.label }}</span>
+                    <span class="font-semibold">{{ c.criteres[crit.key] ?? '–' }}</span>
+                  </div>
+                  <div class="mt-1 h-2 rounded-full bg-surface">
+                    <div class="h-2 rounded-full bg-sillage" [style.width.%]="barWidth(c.criteres[crit.key])"></div>
+                  </div>
+                </li>
+              }
+            </ul>
+          </section>
+
+          <section class="space-y-4" aria-label="Avis des anciens stagiaires">
+            @for (r of c.avis; track r.id) {
+              <article class="card p-5">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p class="font-semibold">{{ r.auteur }}</p>
+                    <p class="text-sm text-muted">{{ r.contexte }} · {{ r.creeLe | frDate }}</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <app-stars [value]="r.noteGlobale" />
+                    <span class="text-sm font-semibold">{{ r.noteGlobale }}</span>
+                    @if (r.verifie) {
+                      <span class="chip bg-valide/20 text-valide-profond">Vérifié</span>
+                    }
+                  </div>
+                </div>
+                <p class="mt-3 text-muted">« {{ r.commentaire }} »</p>
+              </article>
+            } @empty {
+              <p class="card p-5 text-muted">Pas encore d’avis publié pour cette entreprise.</p>
+            }
+
+            <!-- Dépôt d'un avis : réservé aux étudiants ayant une candidature acceptée ici -->
+            @if (reviewSent()) {
+              <p class="rounded-champ bg-valide/20 p-4 font-semibold text-valide-profond" aria-live="polite">
+                Merci ! Votre avis sera publié après modération.
+              </p>
+            } @else if (c.peutDeposerAvis) {
+              <form class="card space-y-4 p-5" [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+                <h2 class="text-lg font-semibold">Déposer un avis</h2>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  @for (crit of criteres; track crit.key) {
+                    <div>
+                      <label [for]="'note-' + crit.key" class="label">{{ crit.label }}</label>
+                      <select [id]="'note-' + crit.key" class="field" [formControlName]="crit.key"
+                              [class.field-error]="reviewForm.get(crit.key)?.invalid && reviewForm.get(crit.key)?.touched">
+                        <option [ngValue]="0" disabled>Choisir une note…</option>
+                        @for (s of scores; track s) {
+                          <option [ngValue]="s">{{ s }} / 5</option>
+                        }
+                      </select>
+                    </div>
+                  }
+                </div>
+                <div>
+                  <label for="avis-contexte" class="label">Votre expérience (facultatif)</label>
+                  <input id="avis-contexte" type="text" class="field" placeholder="Ex. : PFE 2026 · Data engineering" formControlName="contexte" />
+                </div>
+                <div>
+                  <label for="avis-commentaire" class="label">Commentaire</label>
+                  <textarea id="avis-commentaire" rows="4" class="field" formControlName="commentaire"
+                            [class.field-error]="reviewForm.controls.commentaire.invalid && reviewForm.controls.commentaire.touched"></textarea>
+                  @if (reviewForm.controls.commentaire.invalid && reviewForm.controls.commentaire.touched) {
+                    <p class="mt-1 text-sm text-elan-profond">Le commentaire doit contenir entre 20 et 600 caractères.</p>
+                  }
+                </div>
+                @if (reviewError()) {
+                  <p class="text-sm font-semibold text-elan-profond" aria-live="polite">{{ reviewError() }}</p>
+                }
+                <button type="submit" class="btn-primary" [disabled]="sending()">Envoyer l’avis</button>
+              </form>
+            } @else {
+              <p class="text-sm text-muted">
+                @if (auth.isLoggedIn()) {
+                  Seuls les étudiants dont une candidature a été acceptée chez cette entreprise peuvent déposer un avis (un seul avis par entreprise).
+                } @else {
+                  <a routerLink="/connexion" class="font-semibold text-sillage hover:underline">Connectez-vous</a> pour déposer un avis (réservé aux étudiants dont une candidature a été acceptée ici).
+                }
+              </p>
+            }
+          </section>
+        </div>
+      }
+    }
+  </div>
+}
+}

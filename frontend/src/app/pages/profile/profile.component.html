@@ -1,0 +1,173 @@
+
+<div>
+  <p class="text-sm font-semibold uppercase tracking-wide text-sillage">Espace étudiant</p>
+  <h1 class="mt-1 text-2xl font-bold">Mon profil</h1>
+  <p class="mt-1 text-sm text-muted">
+    Présentez votre parcours et vos compétences aux entreprises.
+  </p>
+</div>
+
+<form class="mt-6 space-y-6" (ngSubmit)="saveProfile()">
+  <section class="card p-5 sm:p-6">
+    <h2 class="text-lg font-bold">Informations personnelles</h2>
+    <p class="mt-1 text-sm text-muted">Comment les entreprises peuvent-elles vous contacter ?</p>
+
+    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+      <div>
+        <label class="label" for="nom">Nom et prénom</label>
+        <input id="nom" name="nom" class="field" [(ngModel)]="profile.nom" required />
+      </div>
+
+      <div>
+        <label class="label" for="email">Adresse e-mail</label>
+        <input id="email" name="email" type="email" class="field" [(ngModel)]="profile.email" required />
+      </div>
+
+      <div>
+        <label class="label" for="telephone">Téléphone</label>
+        <input id="telephone" name="telephone" class="field" [(ngModel)]="profile.telephone" placeholder="+216 ..." />
+      </div>
+
+      <div>
+        <label class="label" for="ville">Ville</label>
+        <input id="ville" name="ville" class="field" [(ngModel)]="profile.ville" placeholder="Tunis, Sousse..." />
+      </div>
+    </div>
+  </section>
+
+  <section class="card p-5 sm:p-6">
+    <h2 class="text-lg font-bold">Parcours académique</h2>
+    <p class="mt-1 text-sm text-muted">
+      Ces informations permettront notamment d'identifier votre établissement.
+    </p>
+
+    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+      <div class="sm:col-span-2">
+        <label class="label" for="ecole">École / Université</label>
+        <input id="ecole" name="ecole" class="field" [(ngModel)]="profile.ecole" placeholder="Ex. ENSI, FST, IHEC..." />
+      </div>
+
+      <div>
+        <label class="label" for="formation">Formation</label>
+        <input id="formation" name="formation" class="field" [(ngModel)]="profile.formation" placeholder="Ex. Cycle ingénieur" />
+      </div>
+
+      <div>
+        <label class="label" for="specialite">Spécialité</label>
+        <input id="specialite" name="specialite" class="field" [(ngModel)]="profile.specialite" placeholder="Ex. Informatique" />
+      </div>
+
+      <div>
+        <label class="label" for="niveau">Niveau d'études</label>
+        <select id="niveau" name="niveau" class="field" [(ngModel)]="profile.niveau">
+          <option value="">Sélectionner</option>
+          <option>1re année</option>
+          <option>2e année</option>
+          <option>3e année</option>
+          <option>4e année</option>
+          <option>5e année</option>
+          <option>Master</option>
+          <option>Doctorat</option>
+          <option>Autre</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="label" for="annee">Année universitaire</label>
+        <input id="annee" name="annee" class="field" [(ngModel)]="profile.anneeUniversitaire" placeholder="2026–2027" />
+      </div>
+    </div>
+  </section>
+
+  <section class="card p-5 sm:p-6">
+    <h2 class="text-lg font-bold">Présentation professionnelle</h2>
+
+    <div class="mt-4">
+      <label class="label" for="description">À propos de moi</label>
+      <textarea
+        id="description"
+        name="description"
+        rows="5"
+        class="field"
+        [(ngModel)]="profile.description"
+        placeholder="Présentez votre parcours, vos objectifs et le type de stage recherché..."
+      ></textarea>
+    </div>
+
+    <div class="mt-4">
+      <label class="label" for="competences">Compétences</label>
+      <input
+        id="competences"
+        name="competences"
+        class="field"
+        [(ngModel)]="profile.competences"
+        placeholder="Python, SQL, Angular, Power BI..."
+      />
+      <p class="mt-1 text-xs text-muted">Séparez les compétences par des virgules.</p>
+    </div>
+
+    <div class="mt-4">
+      <label class="label" for="langues">Langues</label>
+      <input
+        id="langues"
+        name="langues"
+        class="field"
+        [(ngModel)]="profile.langues"
+        placeholder="Français, Anglais, Arabe..."
+      />
+    </div>
+  </section>
+
+  <section class="card p-5 sm:p-6">
+    <h2 class="text-lg font-bold">Mon CV</h2>
+    <p class="mt-1 text-sm text-muted">Format PDF uniquement · 2 Mo maximum</p>
+
+    <div class="mt-4 rounded-carte border border-dashed border-bordure p-5">
+      @if (profile.cvName) {
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-semibold">CV ajouté</p>
+            <p class="mt-1 truncate text-sm text-muted">{{ profile.cvName }}</p>
+          </div>
+          <div class="flex gap-2">
+            <a
+              [href]="profile.cvDataUrl"
+              [download]="profile.cvName"
+              class="btn-secondary"
+            >Télécharger</a>
+            <button type="button" class="btn-secondary" (click)="removeCv()">Supprimer</button>
+          </div>
+        </div>
+      } @else {
+        <label for="cv" class="block cursor-pointer text-center">
+          <span class="text-sm font-semibold text-sillage">Choisir un fichier PDF</span>
+          <span class="mt-1 block text-xs text-muted">ou sélectionnez un fichier depuis votre ordinateur</span>
+        </label>
+      }
+
+      <input
+        id="cv"
+        type="file"
+        accept="application/pdf,.pdf"
+        class="mt-4 block w-full text-sm"
+        (change)="onCvSelected($event)"
+      />
+    </div>
+  </section>
+
+  @if (message()) {
+    <p class="rounded-champ bg-valide/10 p-3 text-sm font-semibold text-valide" aria-live="polite">
+      {{ message() }}
+    </p>
+  }
+
+  @if (error()) {
+    <p class="rounded-champ bg-rose-50 p-3 text-sm font-semibold text-rose-700" aria-live="polite">
+      {{ error() }}
+    </p>
+  }
+
+  <div class="flex justify-end">
+    <button type="submit" class="btn-primary">Enregistrer mon profil</button>
+  </div>
+</form>
